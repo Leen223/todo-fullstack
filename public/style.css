@@ -291,3 +291,21 @@ li input[type="text"] {
     padding: 6px 10px;
     flex: 1 1 140px;
 }
+
+/* ===== Bulk add ===== */
+.bulk-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.hint {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.hint.over {
+    color: var(--danger);
+    font-weight: 600;
+}
