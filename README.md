@@ -5,6 +5,7 @@ The HTML/CSS/JS frontend talks to the API with `fetch()`.
 
 ## What it does
 - Add, edit, complete and delete tasks
+- Add many tasks at once (one per line) with a live counter
 - Tasks survive a page refresh and a server restart
 - Empty titles are rejected on both the frontend and the backend
 - Loading state and friendly error messages
@@ -58,6 +59,7 @@ All responses are JSON. Errors look like `{ "error": "message" }`.
 | POST | `/api/tasks` | Create a task `{ "title": "..." }` | 201 |
 | PUT | `/api/tasks/:id` | Edit `title` and/or `is_completed` | 200 |
 | DELETE | `/api/tasks/:id` | Delete a task | 204 |
+| POST | `/api/tasks/bulk` | Create several tasks in one transaction `{ "titles": ["A", "B"] }` (1 to 50 items) | 201 |
 
 ## Project structure
 ```
@@ -66,6 +68,7 @@ src/config.php   .env loader
 src/db.php       PDO connection
 src/helpers.php  JSON responses and validation
 src/tasks.php    endpoint handlers
+src/bulk.php     bulk-add endpoint (transaction)
 router.php       router for PHP's built-in server
 database/        schema.sql
 ```
