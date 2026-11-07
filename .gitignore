@@ -1,0 +1,11 @@
+# Secrets
+.env
+
+# Dependencies / build output
+vendor/
+node_modules/
+
+# Editors / OS
+.idea/
+.vscode/
+.DS_Store
