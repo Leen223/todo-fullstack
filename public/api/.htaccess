@@ -1,0 +1,4 @@
+# Apache / XAMPP: send every /api/... request to index.php
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
