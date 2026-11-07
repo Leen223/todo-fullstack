@@ -15,8 +15,8 @@ The HTML/CSS/JS frontend talks to the API with `fetch()`.
 
 ## Install
 ```bash
-git clone https://github.com/<your-username>/todofullstack.git
-cd todofullstack
+git clone https://github.com/Leen223/todo-fullstack.git
+cd todo-fullstack
 ```
 
 ## Set up the database
