@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To Do List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="todo-container">
+        <h1>My To Do List</h1>
+
+        <p id="error" class="error" role="alert" hidden></p>
+
+        <h3>Add New Task</h3>
+        <form id="task-form" class="inline-form" novalidate>
+            <input id="task-input" type="text" placeholder="Enter your task..." maxlength="255" autocomplete="off" aria-label="Task title">
+            <button type="submit">Add Task</button>
+        </form>
+
+        <h2>My Tasks</h2>
+        <p id="status" class="status" role="status" hidden></p>
+        <p id="empty-message" class="empty" hidden>No tasks yet. Add your first task!</p>
+        <ul id="todo-list"></ul>
+    </div>
+
+    <!-- If the frontend runs on another port, set it first:
+         <script>window.API_BASE = "http://localhost:8000/api";</script> -->
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

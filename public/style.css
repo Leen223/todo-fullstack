@@ -1,0 +1,293 @@
+
+:root {
+    --bg: #eeecf6;
+    --card: #ffffff;
+    --ink: #1f1b2e;
+    --muted: #6f6a85;
+    --line: #e4e1ef;
+    --row: #f7f6fb;
+    --accent: #5b3fd1;
+    --accent-hover: #4a31b3;
+    --accent-soft: #ece8fb;
+    --danger: #d8344a;
+    --danger-hover: #b92a3e;
+    --danger-soft: #fde8eb;
+    --ring: 0 0 0 3px rgba(91, 63, 209, 0.2);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.4;
+    margin: 0;
+    padding: 36px 16px;
+}
+
+.todo-container {
+    background: var(--card);
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(52, 36, 120, 0.1);
+}
+
+h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align: left;
+    margin: 0 0 24px;
+}
+
+h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 20px 0 8px;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 30px 0 12px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line);
+}
+
+/* ===== Inputs ===== */
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin: 0;
+    background: #fff;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+input[type="text"] {
+    height: 46px;
+}
+
+textarea {
+    height: 96px;
+    resize: vertical;
+}
+
+input[type="text"]::placeholder,
+textarea::placeholder {
+    color: #a29fb6;
+}
+
+input[type="text"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: var(--ring);
+}
+
+/* ===== Forms ===== */
+.todo-container form {
+    margin: 0;
+}
+
+.inline-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.inline-form input[type="text"],
+.inline-form textarea {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Bulk form: textarea on top, button underneath on the right */
+.inline-form:has(textarea) {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.inline-form:has(textarea) button {
+    align-self: flex-end;
+}
+
+/* ===== Buttons ===== */
+button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    height: 46px;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.05s;
+}
+
+button:hover {
+    background: var(--accent-hover);
+}
+
+button:active {
+    transform: translateY(1px);
+}
+
+button:focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+}
+
+/* ===== Task list ===== */
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    background: var(--row);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 10px 10px 16px;
+    margin: 0;
+}
+
+li > span {
+    flex: 1 1 140px;
+    min-width: 0;
+    font-size: 15px;
+    overflow-wrap: anywhere;
+}
+
+/* ===== Task buttons (side by side, smaller) ===== */
+.task-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+}
+
+.task-buttons button {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 13px;
+    background: var(--accent-soft);
+    color: var(--accent);
+}
+
+.task-buttons button:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.task-buttons .delete-btn {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.task-buttons .delete-btn:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+/* ===== Completed task ===== */
+.completed {
+    text-decoration: line-through;
+    color: var(--muted);
+}
+
+li:has(.completed) {
+    background: #fbfbfd;
+}
+
+/* ===== Empty state ===== */
+.empty {
+    margin: 0;
+    padding: 22px 16px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    border: 1.5px dashed var(--line);
+    border-radius: 12px;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 20px 12px;
+    }
+
+    .todo-container {
+        padding: 20px 16px;
+        border-radius: 14px;
+    }
+
+    h1 {
+        font-size: 23px;
+    }
+
+    button {
+        padding: 0 16px;
+    }
+}
+
+/* ===== Status, errors, checkbox, edit mode ===== */
+.status {
+    margin: 0 0 10px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.error {
+    margin: 0 0 4px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: 14px;
+}
+
+/* While a request is running, ignore clicks on buttons */
+.busy button {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+li input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+li input[type="text"] {
+    height: 34px;
+    padding: 6px 10px;
+    flex: 1 1 140px;
+}
