@@ -18,6 +18,15 @@
             <button type="submit">Add Task</button>
         </form>
 
+        <h3>Add Tasks in Bulk</h3>
+        <form id="bulk-form" class="inline-form" novalidate>
+            <textarea id="bulk-input" placeholder="Enter each task on a new line..." aria-label="Tasks, one per line"></textarea>
+            <div class="bulk-footer">
+                <span id="bulk-count" class="hint">0 tasks will be added</span>
+                <button type="submit">Add all</button>
+            </div>
+        </form>
+
         <h2>My Tasks</h2>
         <p id="status" class="status" role="status" hidden></p>
         <p id="empty-message" class="empty" hidden>No tasks yet. Add your first task!</p>

@@ -32,4 +32,5 @@ const Api = {
     createTask: (title) => request("/tasks", { method: "POST", body: JSON.stringify({ title }) }),
     updateTask: (id, changes) => request(`/tasks/${id}`, { method: "PUT", body: JSON.stringify(changes) }),
     deleteTask: (id) => request(`/tasks/${id}`, { method: "DELETE" }),
+    createTasksBulk: (titles) => request("/tasks/bulk", { method: "POST", body: JSON.stringify({ titles }) }),
 };

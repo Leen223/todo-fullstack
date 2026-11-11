@@ -144,4 +144,56 @@ async function loadTasks() {
     updateEmptyMessage();
 }
 
+// ===== Bulk add =====
+const bulkForm = document.getElementById("bulk-form");
+const bulkInput = document.getElementById("bulk-input");
+const bulkCount = document.getElementById("bulk-count");
+const MAX_BULK = 50;
+
+// One task per line: trim spaces and ignore empty lines
+function getBulkTitles() {
+    return bulkInput.value
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+}
+
+function updateBulkCount() {
+    const count = getBulkTitles().length;
+    const tooMany = count > MAX_BULK;
+    bulkCount.textContent = tooMany
+        ? `${count} tasks - the maximum is ${MAX_BULK}`
+        : `${count} ${count === 1 ? "task" : "tasks"} will be added`;
+    bulkCount.classList.toggle("over", tooMany);
+}
+
+bulkInput.addEventListener("input", updateBulkCount);
+
+bulkForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const titles = getBulkTitles();
+    if (titles.length === 0) {
+        showError("Type at least one task (one per line).");
+        return;
+    }
+    if (titles.length > MAX_BULK) {
+        showError(`You can add at most ${MAX_BULK} tasks at once.`);
+        return;
+    }
+
+    const res = await run(() => Api.createTasksBulk(titles), `Adding ${titles.length} tasks…`);
+    if (res.ok) {
+        // created[0] is the first line you typed: add from the last so it ends up on top
+        for (let i = res.value.length - 1; i >= 0; i--) {
+            listEl.prepend(createTaskItem(res.value[i]));
+        }
+        updateEmptyMessage();
+        bulkInput.value = "";
+        updateBulkCount();
+    }
+});
+
+updateBulkCount();
+
 loadTasks();
