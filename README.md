@@ -1,9 +1,10 @@
 # Full-Stack To-Do List (PHP + MySQL)
 
 A to-do list where tasks are saved in a MySQL database through a JSON REST API written in plain PHP.
-The HTML/CSS/JS frontend talks to the API with `fetch()`.
+Users register and log in with a JWT. The HTML/CSS/JS frontend talks to the API with `fetch()`.
 
 ## What it does
+- User accounts: register, log in and log out (JWT, passwords hashed with bcrypt)
 - Add, edit, complete and delete tasks
 - Add many tasks at once (one per line) with a live counter
 - Tasks survive a page refresh and a server restart
@@ -21,10 +22,13 @@ cd todo-fullstack
 ```
 
 ## Set up the database
+Run the two scripts in this order:
 ```bash
 mysql -u root -p < database/schema.sql
+mysql -u root -p < database/002_auth.sql
 ```
-This creates the `todo_app` database and the `tasks` table.
+- `schema.sql` creates the `todo_app` database and the `tasks` table.
+- `002_auth.sql` adds the `users` table and the `tasks.user_id` column. Run it only once.
 
 Then create your `.env` file and fill in your values (it is ignored by Git):
 ```bash
@@ -37,6 +41,13 @@ cp .env.example .env
 | `DB_USER` / `DB_PASSWORD` | MySQL login |
 | `DB_NAME` | `todo_app` |
 | `CORS_ORIGIN` | Allowed frontend origin (default `*`) |
+| `JWT_SECRET` | Secret used to sign tokens: at least 32 random characters |
+| `JWT_EXPIRES_IN` | Token lifetime in seconds (default `3600` = 1 hour) |
+
+Generate a secret with:
+```bash
+php -r "echo bin2hex(random_bytes(32));"
+```
 
 ## Run
 ```bash
@@ -61,14 +72,37 @@ All responses are JSON. Errors look like `{ "error": "message" }`.
 | DELETE | `/api/tasks/:id` | Delete a task | 204 |
 | POST | `/api/tasks/bulk` | Create several tasks in one transaction `{ "titles": ["A", "B"] }` (1 to 50 items) | 201 |
 
+## Authentication (JWT)
+Users must register and log in before using the app. Passwords are hashed with bcrypt and never returned by the API.
+
+| Method | Endpoint | Purpose | Success |
+|---|---|---|---|
+| POST | `/api/auth/register` | Create an account `{ "name", "email", "password" }` | 201 (400 invalid input, 409 email already used) |
+| POST | `/api/auth/login` | Returns a JWT `{ "email", "password" }` | 200 (401 "Invalid email or password") |
+| GET | `/api/auth/me` | Profile of the logged-in user | 200 (401 without a valid token) |
+
+- The JWT payload holds only `id`, `email` and `role` (plus the `iat`/`exp` times) and is signed with HS256 using `JWT_SECRET`. It expires after `JWT_EXPIRES_IN` seconds (default 1 hour).
+- Send it on every API call: `Authorization: Bearer <token>`.
+
+### Where the token is stored
+The frontend keeps the JWT in **localStorage** and sends it in the `Authorization` header.
+
+- **Why:** it is simple and works when the frontend and the API are on different domains.
+- **Trade-off:** JavaScript can read localStorage, so an XSS bug could steal the token. An `httpOnly` cookie cannot be read by JavaScript, but it needs CSRF protection and extra cookie/CORS settings.
+- **Mitigations used:** all user text is inserted with `textContent` (never `innerHTML`), and the token expires after 1 hour.
+
 ## Project structure
 ```
-public/          index.html, style.css, api.js, app.js and api/index.php (the router)
-src/config.php   .env loader
-src/db.php       PDO connection
-src/helpers.php  JSON responses and validation
-src/tasks.php    endpoint handlers
-src/bulk.php     bulk-add endpoint (transaction)
-router.php       router for PHP's built-in server
-database/        schema.sql
+public/                 index.html, login.html, register.html, style.css, api.js, app.js, auth.js
+public/api/index.php    API router
+src/config.php          .env loader
+src/db.php              PDO connection
+src/helpers.php         JSON responses and validation
+src/jwt.php             JWT helpers (HS256)
+src/middleware.php      auth middleware
+src/auth.php            register, login and me
+src/tasks.php           task endpoint handlers
+src/bulk.php            bulk-add endpoint (transaction)
+router.php              router for PHP's built-in server
+database/               schema.sql, 002_auth.sql
 ```
