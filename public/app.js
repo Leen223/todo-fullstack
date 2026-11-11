@@ -1,3 +1,4 @@
+// UI logic. Every server call goes through the Api object from api.js.
 
 const taskForm = document.getElementById("task-form");
 const taskInput = document.getElementById("task-input");
@@ -5,6 +6,9 @@ const statusEl = document.getElementById("status");
 const errorEl = document.getElementById("error");
 const listEl = document.getElementById("todo-list");
 const emptyEl = document.getElementById("empty-message");
+
+// Not logged in? Go to the login page.
+Auth.requireLogin();
 
 function showError(message) {
     errorEl.textContent = message;
@@ -52,7 +56,7 @@ function createTaskItem(task, isEditing = false) {
     checkbox.disabled = isEditing;
     checkbox.setAttribute("aria-label", "Mark task as completed");
 
-
+    // ----- Edit mode -----
     if (isEditing) {
         const input = document.createElement("input");
         input.type = "text";
@@ -86,7 +90,7 @@ function createTaskItem(task, isEditing = false) {
         return li;
     }
 
-   
+    // ----- Normal mode -----
     const title = document.createElement("span");
     title.textContent = task.title;
     title.classList.toggle("completed", task.is_completed);
@@ -196,4 +200,22 @@ bulkForm.addEventListener("submit", async (event) => {
 
 updateBulkCount();
 
+// ===== Logged-in user =====
+const userNameEl = document.getElementById("user-name");
+document.getElementById("logout-btn").addEventListener("click", () => Auth.logout());
+
+async function showUser() {
+    const cached = Auth.getUser();
+    if (cached) userNameEl.textContent = cached.name;
+
+    try {
+        const me = await Api.me();
+        Auth.setUser(me);
+        userNameEl.textContent = me.name;
+    } catch {
+        // a 401 has already sent the visitor to the login page
+    }
+}
+
+showUser();
 loadTasks();

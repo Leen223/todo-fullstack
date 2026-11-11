@@ -1,4 +1,8 @@
 # Apache / XAMPP: send every /api/... request to index.php
 RewriteEngine On
+
+# Apache hides the Authorization header from PHP unless we pass it on
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [QSA,L]
