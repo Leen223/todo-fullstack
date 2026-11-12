@@ -9,6 +9,7 @@ require __DIR__ . '/../../src/middleware.php';
 require __DIR__ . '/../../src/auth.php';
 require __DIR__ . '/../../src/tasks.php';
 require __DIR__ . '/../../src/bulk.php';
+require __DIR__ . '/../../src/admin.php';
 
 loadEnv(__DIR__ . '/../../.env');
 
@@ -32,20 +33,29 @@ try {
         routeAuth($a[1], $method);
     }
 
+    // ---- /api/admin/users, /api/admin/tasks (admin only) ----
+    if (preg_match('#/api/admin/(users|tasks)(?:/([^/]+))?/?$#', $path, $ad)) {
+        routeAdmin($ad[1], $ad[2] ?? null, $method);
+    }
+
     // ---- /api/tasks ... (works from any folder) ----
     if (!preg_match('#/api/tasks(?:/([^/]+))?/?$#', $path, $m)) {
         jsonError(404, 'Endpoint not found');
     }
     $id = $m[1] ?? null;
 
+    // Every task endpoint needs a valid token (401 otherwise)
+    $user   = requireAuth();
+    $userId = $user['id'];
+
     if ($id === null) {
         // /api/tasks
         switch ($method) {
             case 'GET':
-                listTasks();
+                listTasks($userId);
                 break;
             case 'POST':
-                createTask();
+                createTask($userId);
                 break;
             default:
                 jsonError(405, 'Method not allowed');
@@ -56,7 +66,7 @@ try {
             if ($method !== 'POST') {
                 jsonError(405, 'Method not allowed');
             }
-            bulkCreateTasks();
+            bulkCreateTasks($userId);
         }
 
         // ---- single task ----
@@ -67,13 +77,13 @@ try {
 
         switch ($method) {
             case 'GET':
-                getTask($id);
+                getTask($id, $userId);
                 break;
             case 'PUT':
-                updateTask($id);
+                updateTask($id, $userId);
                 break;
             case 'DELETE':
-                deleteTask($id);
+                deleteTask($id, $userId);
                 break;
             default:
                 jsonError(405, 'Method not allowed');
