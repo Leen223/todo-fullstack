@@ -1,31 +1,34 @@
 <?php
 declare(strict_types=1);
 
-function findTask(int $id): ?array
+
+
+function findTask(int $id, int $userId): ?array
 {
     $stmt = db()->prepare(
-        'SELECT id, title, is_completed, created_at, updated_at FROM tasks WHERE id = ?'
+        'SELECT id, title, is_completed, created_at, updated_at FROM tasks WHERE id = ? AND user_id = ?'
     );
-    $stmt->execute([$id]);
+    $stmt->execute([$id, $userId]);
     $row = $stmt->fetch();
 
     return $row ? formatTask($row) : null;
 }
 
 
-function listTasks(): void
+function listTasks(int $userId): void
 {
-    $rows = db()->query(
-        'SELECT id, title, is_completed, created_at, updated_at FROM tasks ORDER BY created_at DESC, id DESC'
-    )->fetchAll();
+    $stmt = db()->prepare(
+        'SELECT id, title, is_completed, created_at, updated_at FROM tasks WHERE user_id = ? ORDER BY created_at DESC, id DESC'
+    );
+    $stmt->execute([$userId]);
 
-    jsonResponse(200, array_map('formatTask', $rows));
+    jsonResponse(200, array_map('formatTask', $stmt->fetchAll()));
 }
 
 
-function getTask(int $id): void
+function getTask(int $id, int $userId): void
 {
-    $task = findTask($id);
+    $task = findTask($id, $userId);
     if ($task === null) {
         jsonError(404, 'Task not found');
     }
@@ -33,19 +36,19 @@ function getTask(int $id): void
 }
 
 
-function createTask(): void
+function createTask(int $userId): void
 {
     $data  = readJson();
     $title = validTitle($data['title'] ?? null);
 
-    $stmt = db()->prepare('INSERT INTO tasks (title) VALUES (?)');
-    $stmt->execute([$title]);
+    $stmt = db()->prepare('INSERT INTO tasks (user_id, title) VALUES (?, ?)');
+    $stmt->execute([$userId, $title]);
 
-    jsonResponse(201, findTask((int) db()->lastInsertId()));
+    jsonResponse(201, findTask((int) db()->lastInsertId(), $userId));
 }
 
 
-function updateTask(int $id): void
+function updateTask(int $id, int $userId): void
 {
     $data     = readJson();
     $hasTitle = array_key_exists('title', $data);
@@ -62,13 +65,13 @@ function updateTask(int $id): void
     }
     $done = $hasDone ? (int) $data['is_completed'] : null;
 
-
+    
     $stmt = db()->prepare(
-        'UPDATE tasks SET title = COALESCE(?, title), is_completed = COALESCE(?, is_completed) WHERE id = ?'
+        'UPDATE tasks SET title = COALESCE(?, title), is_completed = COALESCE(?, is_completed) WHERE id = ? AND user_id = ?'
     );
-    $stmt->execute([$title, $done, $id]);
+    $stmt->execute([$title, $done, $id, $userId]);
 
-    $task = findTask($id);
+    $task = findTask($id, $userId);
     if ($task === null) {
         jsonError(404, 'Task not found');
     }
@@ -76,10 +79,10 @@ function updateTask(int $id): void
 }
 
 
-function deleteTask(int $id): void
+function deleteTask(int $id, int $userId): void
 {
-    $stmt = db()->prepare('DELETE FROM tasks WHERE id = ?');
-    $stmt->execute([$id]);
+    $stmt = db()->prepare('DELETE FROM tasks WHERE id = ? AND user_id = ?');
+    $stmt->execute([$id, $userId]);
 
     if ($stmt->rowCount() === 0) {
         jsonError(404, 'Task not found');
