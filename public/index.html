@@ -12,7 +12,10 @@
 
         <div class="userbar">
             <span>Signed in as <strong id="user-name">...</strong></span>
-            <button type="button" id="logout-btn" class="logout-btn">Log out</button>
+            <div class="userbar-actions">
+                <a id="admin-link" class="admin-link" href="admin.html" hidden>Admin</a>
+                <button type="button" id="logout-btn" class="logout-btn">Log out</button>
+            </div>
         </div>
 
         <p id="error" class="error" role="alert" hidden></p>
@@ -38,8 +41,7 @@
         <ul id="todo-list"></ul>
     </div>
 
-    <!-- If the frontend runs on another port, set it first:
-         <script>window.API_BASE = "http://localhost:8000/api";</script> -->
+    
     <script src="api.js"></script>
     <script src="app.js"></script>
 </body>

@@ -1,9 +1,8 @@
-// All communication with the backend lives in this file.
 const API_BASE = window.API_BASE || "api";
 const TOKEN_KEY = "todo_token";
 const USER_KEY = "todo_user";
 
-// The JWT is kept in localStorage (see the README for the trade-off).
+
 const Auth = {
     getToken() {
         return localStorage.getItem(TOKEN_KEY);
@@ -30,7 +29,7 @@ const Auth = {
         this.clear();
         window.location.replace("login.html");
     },
-    // Not logged in? Send the visitor to the login page.
+    
     requireLogin() {
         if (!this.getToken()) {
             window.location.replace("login.html");
@@ -40,7 +39,7 @@ const Auth = {
     },
 };
 
-// options.auth = false is used for login/register (no token, and a 401 is a normal error)
+
 async function request(path, options = {}) {
     const { auth = true, ...fetchOptions } = options;
 
@@ -57,21 +56,21 @@ async function request(path, options = {}) {
         throw new Error("Cannot reach the server. Please check your connection and try again.");
     }
 
-    // Token missing, wrong or expired: log out and go to the login page
+   
     if (response.status === 401 && auth) {
         Auth.clear();
         window.location.replace("login.html");
         throw new Error("Your session has expired. Please log in again.");
     }
 
-    // DELETE returns 204 with no body
+    
     if (response.status === 204) return null;
 
     let data = null;
     try {
         data = await response.json();
     } catch {
-        // the response had no JSON body
+        
     }
 
     if (!response.ok) {
@@ -81,14 +80,19 @@ async function request(path, options = {}) {
 }
 
 const Api = {
-    // auth
+    
     register: (name, email, password) =>
         request("/auth/register", { method: "POST", auth: false, body: JSON.stringify({ name, email, password }) }),
     login: (email, password) =>
         request("/auth/login", { method: "POST", auth: false, body: JSON.stringify({ email, password }) }),
     me: () => request("/auth/me"),
 
-    // tasks
+    
+    adminUsers: () => request("/admin/users"),
+    adminTasks: () => request("/admin/tasks"),
+    adminDeleteUser: (id) => request(`/admin/users/${id}`, { method: "DELETE" }),
+
+    
     getTasks: () => request("/tasks"),
     getTask: (id) => request(`/tasks/${id}`),
     createTask: (title) => request("/tasks", { method: "POST", body: JSON.stringify({ title }) }),

@@ -395,3 +395,83 @@ li input[type="text"] {
     background: var(--accent);
     color: #fff;
 }
+
+/* ===== Admin ===== */
+.userbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.admin-link {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-link:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+.admin-link[hidden] {
+    display: none;
+}
+
+.todo-container.wide {
+    max-width: 920px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th,
+td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    overflow-wrap: anywhere;
+}
+
+th {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.table-btn {
+    height: 30px;
+    padding: 0 12px;
+    font-size: 13px;
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.table-btn:hover {
+    background: var(--danger);
+    color: #fff;
+}

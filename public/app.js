@@ -1,4 +1,3 @@
-// UI logic. Every server call goes through the Api object from api.js.
 
 const taskForm = document.getElementById("task-form");
 const taskInput = document.getElementById("task-input");
@@ -7,7 +6,7 @@ const errorEl = document.getElementById("error");
 const listEl = document.getElementById("todo-list");
 const emptyEl = document.getElementById("empty-message");
 
-// Not logged in? Go to the login page.
+
 Auth.requireLogin();
 
 function showError(message) {
@@ -19,8 +18,7 @@ function updateEmptyMessage() {
     emptyEl.hidden = listEl.children.length > 0;
 }
 
-// Runs an API call with a loading message and a friendly error.
-// Returns { ok: true, value } or { ok: false }.
+
 async function run(action, loadingText) {
     showError("");
     statusEl.textContent = loadingText;
@@ -56,7 +54,7 @@ function createTaskItem(task, isEditing = false) {
     checkbox.disabled = isEditing;
     checkbox.setAttribute("aria-label", "Mark task as completed");
 
-    // ----- Edit mode -----
+    
     if (isEditing) {
         const input = document.createElement("input");
         input.type = "text";
@@ -90,7 +88,7 @@ function createTaskItem(task, isEditing = false) {
         return li;
     }
 
-    // ----- Normal mode -----
+    
     const title = document.createElement("span");
     title.textContent = task.title;
     title.classList.toggle("completed", task.is_completed);
@@ -154,7 +152,7 @@ const bulkInput = document.getElementById("bulk-input");
 const bulkCount = document.getElementById("bulk-count");
 const MAX_BULK = 50;
 
-// One task per line: trim spaces and ignore empty lines
+
 function getBulkTitles() {
     return bulkInput.value
         .split("\n")
@@ -188,7 +186,7 @@ bulkForm.addEventListener("submit", async (event) => {
 
     const res = await run(() => Api.createTasksBulk(titles), `Adding ${titles.length} tasks…`);
     if (res.ok) {
-        // created[0] is the first line you typed: add from the last so it ends up on top
+
         for (let i = res.value.length - 1; i >= 0; i--) {
             listEl.prepend(createTaskItem(res.value[i]));
         }
@@ -200,20 +198,25 @@ bulkForm.addEventListener("submit", async (event) => {
 
 updateBulkCount();
 
-// ===== Logged-in user =====
+
 const userNameEl = document.getElementById("user-name");
+const adminLinkEl = document.getElementById("admin-link");
 document.getElementById("logout-btn").addEventListener("click", () => Auth.logout());
 
 async function showUser() {
     const cached = Auth.getUser();
-    if (cached) userNameEl.textContent = cached.name;
+    if (cached) {
+        userNameEl.textContent = cached.name;
+        adminLinkEl.hidden = cached.role !== "admin";
+    }
 
     try {
         const me = await Api.me();
         Auth.setUser(me);
         userNameEl.textContent = me.name;
+        adminLinkEl.hidden = me.role !== "admin";
     } catch {
-        // a 401 has already sent the visitor to the login page
+        
     }
 }
 
