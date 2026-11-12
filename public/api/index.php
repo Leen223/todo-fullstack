@@ -1,22 +1,43 @@
 <?php
 declare(strict_types=1);
 
-require __DIR__ . '/../../src/config.php';
-require __DIR__ . '/../../src/db.php';
-require __DIR__ . '/../../src/helpers.php';
-require __DIR__ . '/../../src/jwt.php';
-require __DIR__ . '/../../src/middleware.php';
-require __DIR__ . '/../../src/auth.php';
-require __DIR__ . '/../../src/tasks.php';
-require __DIR__ . '/../../src/bulk.php';
-require __DIR__ . '/../../src/admin.php';
+// Find the project folder that contains src/ and .env. Two layouts are supported:
+//   1) src/ and .env next to public/ (local, or above the web root on a host)
+//   2) src/ and .env inside the web root (hosts where you cannot go above it)
+$root = null;
+foreach ([__DIR__ . '/../..', __DIR__ . '/..'] as $candidate) {
+    if (is_file($candidate . '/src/config.php')) {
+        $root = $candidate;
+        break;
+    }
+}
+if ($root === null) {
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    exit('{"error":"Server is not configured correctly"}');
+}
 
-loadEnv(__DIR__ . '/../../.env');
+require $root . '/src/config.php';
+require $root . '/src/db.php';
+require $root . '/src/helpers.php';
+require $root . '/src/jwt.php';
+require $root . '/src/middleware.php';
+require $root . '/src/auth.php';
+require $root . '/src/tasks.php';
+require $root . '/src/bulk.php';
+require $root . '/src/admin.php';
 
-// CORS (needed only if the frontend runs on a different origin)
-header('Access-Control-Allow-Origin: ' . env('CORS_ORIGIN', '*'));
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+loadEnv($root . '/.env');
+
+// CORS: only the frontend domain from .env is allowed, never "*".
+// If the frontend and the API are on the same domain, CORS_ORIGIN can stay empty.
+$allowedOrigin = env('CORS_ORIGIN');
+if ($allowedOrigin !== '' && $allowedOrigin !== '*') {
+    header('Access-Control-Allow-Origin: ' . $allowedOrigin);
+    header('Vary: Origin');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+}
 
 $method = $_SERVER['REQUEST_METHOD'];
 

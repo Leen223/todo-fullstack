@@ -1,8 +1,17 @@
-# Apache / XAMPP: send every /api/... request to index.php
+# Apache / shared hosting: send every /api/... request to index.php
 RewriteEngine On
+
+# Same https redirect as in the parent folder (rewrite rules are not inherited)
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Apache hides the Authorization header from PHP unless we pass it on
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^ index.php [QSA,L]
