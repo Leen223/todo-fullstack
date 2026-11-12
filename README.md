@@ -5,6 +5,7 @@ Users register and log in with a JWT. The HTML/CSS/JS frontend talks to the API 
 
 ## What it does
 - User accounts: register, log in and log out (JWT, passwords hashed with bcrypt)
+- Every user sees and edits only their own tasks; admins can also see all users and all tasks
 - Add, edit, complete and delete tasks
 - Add many tasks at once (one per line) with a live counter
 - Tasks survive a page refresh and a server restart
@@ -63,6 +64,8 @@ If the frontend runs on another port, add this line before `api.js` in `public/i
 ## API
 All responses are JSON. Errors look like `{ "error": "message" }`.
 
+**Every `/api/tasks` endpoint needs `Authorization: Bearer <token>`** and only works on the logged-in user's own tasks (401 without a valid token).
+
 | Method | Endpoint | Purpose | Success |
 |---|---|---|---|
 | GET | `/api/tasks` | List all tasks, newest first | 200 |
@@ -91,18 +94,57 @@ The frontend keeps the JWT in **localStorage** and sends it in the `Authorizatio
 - **Trade-off:** JavaScript can read localStorage, so an XSS bug could steal the token. An `httpOnly` cookie cannot be read by JavaScript, but it needs CSRF protection and extra cookie/CORS settings.
 - **Mitigations used:** all user text is inserted with `textContent` (never `innerHTML`), and the token expires after 1 hour.
 
+## Authorization (roles)
+
+| Role | Own tasks | Other users' tasks | Users list |
+|---|---|---|---|
+| `user` (default) | view, add, edit, delete | no access | no access |
+| `admin` | view, add, edit, delete | view all, with the owner's name | view all |
+
+- The **auth middleware** (`requireAuth`) verifies the JWT and loads the user from the database, so a deleted account or a changed role takes effect immediately.
+- The **role middleware** (`requireRole('admin')`) protects the admin endpoints.
+- Every task query is limited with `WHERE user_id = ?`, and new tasks are saved with the current user's id.
+
+### Admin endpoints
+
+| Method | Endpoint | Purpose | Access |
+|---|---|---|---|
+| GET | `/api/admin/users` | List all users (no passwords) | admin |
+| GET | `/api/admin/tasks` | List all tasks with their owner | admin |
+| DELETE | `/api/admin/users/:id` | Delete a user and their tasks | admin |
+
+A normal user gets **403 Forbidden**, and a request without a valid token gets **401**.
+An admin cannot delete their own account.
+
+### Why 404 and not 403 for another user's task
+If a user asks for a task that belongs to someone else, the API answers **404 Not Found**, the same answer as for a task that does not exist. With 403 the API would confirm that the ID exists and belongs to another person, so IDs would be leaked. 403 is used only for admin endpoints, where the endpoint itself exists but the role is not allowed.
+
+### Create the first admin
+Every new account is a normal `user`. Create the first admin with the seed script:
+```bash
+php database/seed_admin.php "Admin Name" admin@example.com "StrongPassword123"
+```
+If the email already exists, that account is promoted to admin (its password is not changed). Or run this SQL:
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'you@example.com';
+```
+The admin page is `admin.html` (the **Admin** link appears in the app only for admins). Hiding the link is only for convenience: the API itself rejects non-admins.
+
+Tasks created before the auth migration have no owner (`user_id` is `NULL`); delete them with `DELETE FROM tasks WHERE user_id IS NULL;`.
+
 ## Project structure
 ```
-public/                 index.html, login.html, register.html, style.css, api.js, app.js, auth.js
+public/                 index.html, login.html, register.html, admin.html, style.css, api.js, app.js, auth.js, admin.js
 public/api/index.php    API router
 src/config.php          .env loader
 src/db.php              PDO connection
 src/helpers.php         JSON responses and validation
 src/jwt.php             JWT helpers (HS256)
-src/middleware.php      auth middleware
+src/middleware.php      auth and role middleware
 src/auth.php            register, login and me
 src/tasks.php           task endpoint handlers
 src/bulk.php            bulk-add endpoint (transaction)
+src/admin.php           admin endpoints
 router.php              router for PHP's built-in server
-database/               schema.sql, 002_auth.sql
+database/               schema.sql, 002_auth.sql, seed_admin.php
 ```
