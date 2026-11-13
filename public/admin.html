@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - My To Do List</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="todo-container wide">
+        <h1>Admin</h1>
+
+        <div class="userbar">
+            <span>Signed in as <strong id="admin-name">...</strong></span>
+            <div class="userbar-actions">
+                <a class="admin-link" href="index.html">My tasks</a>
+                <button type="button" id="logout-btn" class="logout-btn">Log out</button>
+            </div>
+        </div>
+
+        <p id="error" class="error" role="alert" hidden></p>
+
+        <h2>Users</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Created</th><th></th></tr>
+                </thead>
+                <tbody id="users-body"></tbody>
+            </table>
+        </div>
+
+        <h2>All tasks</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Task</th><th>Owner</th><th>Status</th><th>Created</th></tr>
+                </thead>
+                <tbody id="tasks-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

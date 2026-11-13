@@ -21,6 +21,7 @@ function bearerToken(): ?string
     return null;
 }
 
+
 function requireAuth(): array
 {
     $token   = bearerToken();
@@ -30,9 +31,28 @@ function requireAuth(): array
         jsonError(401, 'Unauthorized: missing, invalid or expired token');
     }
 
+    $stmt = db()->prepare('SELECT id, email, role FROM users WHERE id = ?');
+    $stmt->execute([(int) $payload['id']]);
+    $user = $stmt->fetch();
+
+    if (!is_array($user)) {
+        jsonError(401, 'Unauthorized: this account no longer exists');
+    }
+
     return [
-        'id'    => (int) $payload['id'],
-        'email' => (string) $payload['email'],
-        'role'  => (string) $payload['role'],
+        'id'    => (int) $user['id'],
+        'email' => (string) $user['email'],
+        'role'  => (string) $user['role'],
     ];
+}
+
+
+function requireRole(string $role): array
+{
+    $user = requireAuth();
+
+    if ($user['role'] !== $role) {
+        jsonError(403, 'Forbidden: this action requires the ' . $role . ' role');
+    }
+    return $user;
 }

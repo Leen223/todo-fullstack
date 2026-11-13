@@ -3,9 +3,8 @@ declare(strict_types=1);
 
 const MAX_BULK_ITEMS = 50;
 
-// POST /api/tasks/bulk   body: {"titles": ["Task 1", "Task 2"]}
-// Saves all tasks in ONE transaction: if one fails, none are saved.
-function bulkCreateTasks(): void
+
+function bulkCreateTasks(int $userId): void
 {
     $data   = readJson();
     $titles = $data['titles'] ?? null;
@@ -26,17 +25,16 @@ function bulkCreateTasks(): void
     try {
         $pdo->beginTransaction();
 
-        $insert = $pdo->prepare('INSERT INTO tasks (title) VALUES (?)');
+        $insert = $pdo->prepare('INSERT INTO tasks (user_id, title) VALUES (?, ?)');
         $select = $pdo->prepare(
-            'SELECT id, title, is_completed, created_at, updated_at FROM tasks WHERE id = ?'
+            'SELECT id, title, is_completed, created_at, updated_at FROM tasks WHERE id = ? AND user_id = ?'
         );
 
-        // Insert from the last line to the first, so the first line gets the highest id
-        // and shows on top of the list (newest first).
+       
         $created = array_fill(0, count($clean), null);
         for ($i = count($clean) - 1; $i >= 0; $i--) {
-            $insert->execute([$clean[$i]]);
-            $select->execute([(int) $pdo->lastInsertId()]);
+            $insert->execute([$userId, $clean[$i]]);
+            $select->execute([(int) $pdo->lastInsertId(), $userId]);
             $created[$i] = formatTask($select->fetch());
         }
 
